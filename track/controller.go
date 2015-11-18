@@ -34,7 +34,7 @@ func (c Controller) GetInfo(w http.ResponseWriter, r *http.Request, p httprouter
     helper.RunCommand(fmt.Sprintf("keyfinder-cli -n camelot \"%s\"", pathname), kfch)
 
     bpmch := make(chan helper.CommandResult)
-    helper.RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e float -c 1asd -G - | bpm -f \"%%.1f\"", pathname), bpmch)
+    helper.RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e float -c 1 -G - | bpm -f \"%%.1f\"", pathname), bpmch)
 
     kfr := <- kfch
     bpmr := <- bpmch
