@@ -5,12 +5,12 @@ type SuccessResponse struct {
     Bpm         float64   `json:"bpm"`
 }
 
-type ErrorResponse  struct {
+type ErrorResponse struct {
     Message     string    `json:"message"`
     Pathname    string    `json:"pathname"`
 }
 
-type CommandErrorResponse  struct {
+type CommandErrorResponse struct {
     ErrorResponse
     Command     string    `json:"command"`
 }

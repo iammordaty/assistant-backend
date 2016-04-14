@@ -17,7 +17,7 @@ func NewController() *Controller {
     return &Controller{}
 }
 
-func (c Controller) GetInfo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (c Controller) CalculateAudioData(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
     pathname := fmt.Sprintf("/collection%s", p.ByName("pathname"))
 
     if filepath.Ext(pathname) != ".mp3" {
@@ -40,7 +40,7 @@ func (c Controller) GetInfo(w http.ResponseWriter, r *http.Request, p httprouter
     bpmr := <- bpmch
 
     bpm, _ := strconv.ParseFloat(bpmr.Stdout, 64)
-    
+
 	if bpm <= 100 {
         bpmch = make(chan helper.CommandResult)
         helper.RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 1 --norm -G - | bpm -f \"%%.1f\"", pathname), bpmch)
