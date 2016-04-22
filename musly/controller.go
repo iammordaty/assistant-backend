@@ -67,7 +67,7 @@ func (c Controller) AddTrackToCollection(w http.ResponseWriter, r *http.Request,
         for _, key := range payload.InitialKey {
             collection := Collection{};
             collection.Name = fmt.Sprintf("collection.%d.%s.musly", year, fmt.Sprintf("%03s", key));
-            collection.Pathname = fmt.Sprintf("/data/%s", collection.Name)
+            collection.Pathname = fmt.Sprintf("/data/collections/%d/%s", year, collection.Name)
 
             collections = append(collections, collection)
         }
@@ -159,7 +159,7 @@ func (c Controller) GetSimilarTracks(w http.ResponseWriter, r *http.Request, p h
         for _, key := range payload.InitialKey {
             collection := Collection{};
             collection.Name = fmt.Sprintf("collection.%d.%s.musly", year, fmt.Sprintf("%03s", key));
-            collection.Pathname = fmt.Sprintf("/data/%s", collection.Name)
+            collection.Pathname = fmt.Sprintf("/data/collections/%d/%s", year, collection.Name)
 
             collections = append(collections, collection)
         }

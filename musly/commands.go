@@ -6,6 +6,7 @@ import (
     "errors"
     "fmt"
     "os"
+    "path/filepath"
     "sort"
     "strconv"
     "strings"
@@ -20,6 +21,12 @@ func ensureCollections(collections Collections) (err error) {
     for i := 0; i < len(collections); i++ {
         if _, err := os.Stat(collections[i].Pathname); err == nil {
             continue
+        }
+
+        dir := filepath.Dir(collections[i].Pathname)
+
+        if _, err := os.Stat(dir); os.IsNotExist(err) {
+            os.MkdirAll(dir, 0777)
         }
 
         ch := make(chan helper.CommandResult)
