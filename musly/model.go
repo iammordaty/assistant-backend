@@ -1,24 +1,32 @@
 package musly
 
 type Track struct {
-    Pathname    string    `json:"pathname"`
+	Pathname string `json:"pathname"`
 }
+
+type Tracks []*Track
 
 type SimilarTrack struct {
-    Track
-    Similarity  float64     `json:"similarity"`
+	Track
+	Similarity float64 `json:"similarity"`
 }
 
-type SimilarTracks  []SimilarTrack
+type SimilarTracks []SimilarTrack
 
-func (s SimilarTracks) Len() int      { return len(s) }
-func (s SimilarTracks) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s SimilarTracks) Len() int           { return len(s) }
+func (s SimilarTracks) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s SimilarTracks) Less(i, j int) bool { return s[i].Similarity > s[j].Similarity }
 
-type Tracks    []*Track
-
 type Collection struct {
-    Name        string    `json:"name"`
+	Name     string `json:"name"`
+	Pathname string `json:"pathname"`
+	Tracks   Tracks `json:"tracks,omitempty"`
+}
+
+type Collections []Collection
+
+type Payload struct {
     Pathname    string    `json:"pathname"`
-    Tracks      Tracks    `json:"tracks,omitempty"`
+    Genre       []string  `json:"genre"`
+    Year        []uint16  `json:"year"`
 }
