@@ -106,11 +106,6 @@ func getSimilarTracks(track Track, collections Collections) (similarTracks Simil
     var stdouts bytes.Buffer
 
 	for i := 0; i < len(crs); i++ {
-        if crs[i].Error != nil {
-            err = errors.New(fmt.Sprintf("An error occurred when calculating similarity: %s.", crs[i].Stderr))
-            break
-        }
-
         stdouts.WriteString(crs[i].Stdout + "\n")
     }
 
