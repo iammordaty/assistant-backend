@@ -27,6 +27,6 @@ type Collections []Collection
 
 type Payload struct {
     Pathname    string    `json:"pathname"`
-    Genre       []string  `json:"genre"`
+    InitialKey  []string  `json:"initial_key"`
     Year        []uint16  `json:"year"`
 }
