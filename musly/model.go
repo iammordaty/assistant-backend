@@ -1,13 +1,14 @@
 package musly
 
 type Track struct {
-    Pathname string `json:"pathname"`
+    RelativePathname string `json:"pathname"`
+    Pathname         string `json:"-"`
 }
 
 type Tracks []*Track
 
 type SimilarTrack struct {
-    Track
+    *Track
     Similarity float64 `json:"similarity"`
 }
 
@@ -23,7 +24,7 @@ type Collection struct {
     Tracks   Tracks `json:"tracks,omitempty"`
 }
 
-type Collections []Collection
+type Collections []*Collection
 
 type Payload struct {
     Pathname    string    `json:"pathname"`

@@ -20,6 +20,22 @@ func NewController() *Controller {
     return &Controller{}
 }
 
+func NewTrack(relativePathname string) *Track {
+    t := &Track{}
+    t.RelativePathname = relativePathname;
+    t.Pathname = fmt.Sprintf("/collection%s", relativePathname);
+
+    return t
+}
+
+func NewCollection(year uint16, key string) *Collection {
+    c := &Collection{};
+    c.Name = fmt.Sprintf("collection.%d.%s.musly", year, fmt.Sprintf("%03s", key));
+    c.Pathname = fmt.Sprintf("/data/collections/%d/%s", year, c.Name)
+
+    return c;
+}
+
 // POST /musly/collection/tracks
 // { "initial_key": [ "4A", "5A" ], "year": [ 2015, 2014 ], "pathname": "pathname" }
 // musly -x mp3 -a "track_pathname" -c "collection_pathname"
@@ -48,8 +64,7 @@ func (c Controller) AddTrackToCollection(w http.ResponseWriter, r *http.Request,
         return
     }
 
-    track := Track{}
-    track.Pathname = fmt.Sprintf("/collection%s", payload.Pathname)
+    track := NewTrack(payload.Pathname)
 
     if filepath.Ext(track.Pathname) != ".mp3" {
         helper.RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file", track.Pathname}, http.StatusBadRequest)
@@ -65,9 +80,7 @@ func (c Controller) AddTrackToCollection(w http.ResponseWriter, r *http.Request,
 
     for _, year := range payload.Year {
         for _, key := range payload.InitialKey {
-            collection := Collection{};
-            collection.Name = fmt.Sprintf("collection.%d.%s.musly", year, fmt.Sprintf("%03s", key));
-            collection.Pathname = fmt.Sprintf("/data/collections/%d/%s", year, collection.Name)
+            collection := NewCollection(year, key)
 
             collections = append(collections, collection)
         }
@@ -118,7 +131,7 @@ func (c Controller) GetCollectionTracks(w http.ResponseWriter, r *http.Request, 
         line = scanner.Text()
 
         if strings.HasPrefix(line, "track-id") {
-            collection.Tracks = append(collection.Tracks, &Track{strings.SplitAfter(line, "track-origin: ")[1]} )
+            collection.Tracks = append(collection.Tracks, NewTrack(strings.SplitAfter(line, "track-origin: ")[1]))
         }
     }
 
@@ -140,8 +153,7 @@ func (c Controller) GetSimilarTracks(w http.ResponseWriter, r *http.Request, p h
         }
     }
 
-    track := Track{}
-    track.Pathname = fmt.Sprintf("/collection%s", p.ByName("pathname"))
+    track := NewTrack(p.ByName("pathname"))
 
     if filepath.Ext(track.Pathname) != ".mp3" {
         helper.RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file", track.Pathname}, http.StatusBadRequest)
@@ -157,9 +169,7 @@ func (c Controller) GetSimilarTracks(w http.ResponseWriter, r *http.Request, p h
 
     for _, year := range payload.Year {
         for _, key := range payload.InitialKey {
-            collection := Collection{};
-            collection.Name = fmt.Sprintf("collection.%d.%s.musly", year, fmt.Sprintf("%03s", key));
-            collection.Pathname = fmt.Sprintf("/data/collections/%d/%s", year, collection.Name)
+            collection := NewCollection(year, key)
 
             collections = append(collections, collection)
         }

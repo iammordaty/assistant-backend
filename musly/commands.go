@@ -58,7 +58,7 @@ func ensureCollections(collections Collections) (err error) {
 }
 
 // Adds track to collections
-func addTrackToCollections(track Track, collections Collections) (err error) {
+func addTrackToCollections(track *Track, collections Collections) (err error) {
     var chans = []chan helper.CommandResult{}
 
     for i := 0; i < len(collections); i++ {
@@ -92,7 +92,7 @@ func addTrackToCollections(track Track, collections Collections) (err error) {
 }
 
 // Returns similar tracks
-func getSimilarTracks(track Track, collections Collections) (similarTracks SimilarTracks, err error) {
+func getSimilarTracks(track *Track, collections Collections) (similarTracks SimilarTracks, err error) {
     var chans = []chan helper.CommandResult{}
 
     for i := 0; i < len(collections); i++ {
@@ -128,8 +128,7 @@ func getSimilarTracks(track Track, collections Collections) (similarTracks Simil
             continue
         }
 
-        pathname := strings.SplitAfter(line, "track-origin: ")[1]
-
+        pathname := strings.Replace(strings.SplitAfter(line, "track-origin: ")[1], "/collection", "", 1)
         similarity, _ := strconv.ParseFloat(strings.Split(strings.SplitAfter(line, "track-similarity: ")[1], ", ")[0], 64)
 
         similaritySum[pathname] += similarity
@@ -141,8 +140,8 @@ func getSimilarTracks(track Track, collections Collections) (similarTracks Simil
     for pathname, similarity := range similaritySum {
         similarity, _ = strconv.ParseFloat(fmt.Sprintf("%.4f", 100 - (similarity / occuriences[pathname] * 100)), 64)
 
-        similarTracks = append(similarTracks, SimilarTrack{Track{pathname}, similarity})
-    }   
+        similarTracks = append(similarTracks, SimilarTrack{NewTrack(pathname), similarity})
+    }
 
     sort.Sort(similarTracks)
 
