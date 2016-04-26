@@ -41,13 +41,13 @@ func (c Controller) CalculateAudioData(w http.ResponseWriter, r *http.Request, p
 
     bpm, _ := strconv.ParseFloat(bpmr.Stdout, 64)
 
-	if bpm <= 100 {
+    if bpm <= 100 {
         bpmch = make(chan helper.CommandResult)
         helper.RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 1 --norm -G - | bpm -f \"%%.1f\"", pathname), bpmch)
         bpmr = <- bpmch
 
         bpm, _ = strconv.ParseFloat(bpmr.Stdout, 64)
-	}
+    }
     
     if kfr.Error != nil {
         helper.RenderJson(w, &CommandErrorResponse{ErrorResponse{kfr.Stderr, pathname}, "keyfinder-cli"}, http.StatusInternalServerError)

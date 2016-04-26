@@ -24,21 +24,21 @@ type CommandResult struct {
     Error       error
 }
 
-func (w *Command) Run() {
+func (c *Command) Run() {
     var stdout, stderr bytes.Buffer
 
-    defer close(w.Result)
+    defer close(c.Result)
 
-    cmd := exec.Command(w.Command, w.Args...)
+    cmd := exec.Command(c.Command, c.Args...)
     cmd.Stdout = &stdout
     cmd.Stderr = &stderr
 
     err := cmd.Run()
 
-    wr := new (CommandResult)
-    wr.Stdout = strings.Trim(stdout.String(), "\n ")
-    wr.Stderr = strings.Trim(stderr.String(), "\n ")
-    wr.Error = err
+    cr := &CommandResult{}
+    cr.Stdout = strings.Trim(stdout.String(), "\n ")
+    cr.Stderr = strings.Trim(stderr.String(), "\n ")
+    cr.Error = err
 
-    w.Result <- *wr
+    c.Result <- *cr
 }

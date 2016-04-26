@@ -80,9 +80,7 @@ func (c Controller) AddTrackToCollection(w http.ResponseWriter, r *http.Request,
 
     for _, year := range payload.Year {
         for _, key := range payload.InitialKey {
-            collection := NewCollection(year, key)
-
-            collections = append(collections, collection)
+            collections = append(collections, NewCollection(year, key))
         }
     }
 
@@ -169,9 +167,7 @@ func (c Controller) GetSimilarTracks(w http.ResponseWriter, r *http.Request, p h
 
     for _, year := range payload.Year {
         for _, key := range payload.InitialKey {
-            collection := NewCollection(year, key)
-
-            collections = append(collections, collection)
+            collections = append(collections, NewCollection(year, key))
         }
     }
 
