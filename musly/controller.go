@@ -1,14 +1,12 @@
 package musly
 
 import (
-    "bufio"
     "encoding/json"
     "fmt"
     "net/http"
     "os"
     "path/filepath"
     "strconv"
-    "strings"
 
     "github.com/iammordaty/assistant-backend/helper"
     "github.com/julienschmidt/httprouter"
@@ -95,45 +93,6 @@ func (c Controller) AddTrackToCollection(w http.ResponseWriter, r *http.Request,
     }
 
     helper.RenderJson(w, collections, http.StatusOK)
-}
-
-// GET /musly/collection/%collection_pathname%/tracks
-// musly -l -c /data/collection.2015.tech-house.musly
-func (c Controller) GetCollectionTracks(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-    var line string
-
-    pathname := fmt.Sprintf("/data/%s", p.ByName("collection_pathname"))
-
-    if _, err := os.Stat(pathname); os.IsNotExist(err) {
-        helper.RenderJson(w, &ErrorResponse{http.StatusText(http.StatusNotFound), pathname}, http.StatusNotFound)
-        return
-    }
-
-    mch := make(chan helper.CommandResult)
-    helper.RunCommand(fmt.Sprintf("musly -l -c \"%s\"", pathname), mch)
-
-    mr := <- mch
-
-    if mr.Error != nil {
-        helper.RenderJson(w, ErrorResponse{mr.Stderr, pathname}, http.StatusInternalServerError)
-        return
-    }
-
-    collection := &Collection{}
-    collection.Name = p.ByName("collection_pathname")
-    collection.Pathname = pathname
-
-    scanner := bufio.NewScanner(strings.NewReader(mr.Stdout))
-
-    for scanner.Scan() {
-        line = scanner.Text()
-
-        if strings.HasPrefix(line, "track-id") {
-            collection.Tracks = append(collection.Tracks, NewTrack(strings.SplitAfter(line, "track-origin: ")[1]))
-        }
-    }
-
-    helper.RenderJson(w, collection, http.StatusOK)
 }
 
 // GET /musly/track/track_pathname/similar?initial_key=4A&initial_key=5A&year=2015&year=2016

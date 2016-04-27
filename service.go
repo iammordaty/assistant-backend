@@ -19,7 +19,6 @@ func main() {
 
     mc := musly.NewController()
     r.POST("/musly/collection/tracks", mc.AddTrackToCollection)
-    r.GET("/musly/collection/tracks", mc.GetCollectionTracks)
     r.GET("/musly/similar/*pathname", mc.GetSimilarTracks)
 
     log.Fatal(http.ListenAndServe(":80", r))
