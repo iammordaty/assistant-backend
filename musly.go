@@ -1,4 +1,4 @@
-package musly
+package main
 
 import (
     "bufio"
@@ -10,13 +10,11 @@ import (
     "sort"
     "strconv"
     "strings"
-
-    "github.com/iammordaty/assistant-backend/helper"
 )
 
 // Ensures that collections are exists has been initialized
-func ensureCollections(collections Collections) (err error) {
-    var chans = []chan helper.CommandResult{}
+func EnsureCollections(collections Collections) (err error) {
+    var chans = []chan CommandResult{}
 
     for i := 0; i < len(collections); i++ {
         if _, err := os.Stat(collections[i].Pathname); err == nil {
@@ -29,17 +27,17 @@ func ensureCollections(collections Collections) (err error) {
             os.MkdirAll(dir, 0777)
         }
 
-        ch := make(chan helper.CommandResult)
+        ch := make(chan CommandResult)
         chans = append(chans, ch)
 
-        helper.RunCommand(fmt.Sprintf("musly -n timbre -c \"%s\"", collections[i].Pathname), ch)
+        RunCommand(fmt.Sprintf("musly -n timbre -c \"%s\"", collections[i].Pathname), ch)
     }
 
     if len(chans) == 0 {
         return
     }
 
-    var crs = []helper.CommandResult{}
+    var crs = []CommandResult{}
 
     for i := 0; i < len(chans); i++ {
         cr := <- chans[i]
@@ -58,17 +56,17 @@ func ensureCollections(collections Collections) (err error) {
 }
 
 // Adds track to collections
-func addTrackToCollections(track *Track, collections Collections) (err error) {
-    var chans = []chan helper.CommandResult{}
+func AddTrackToCollections(track *Track, collections Collections) (err error) {
+    var chans = []chan CommandResult{}
 
     for i := 0; i < len(collections); i++ {
-        ch := make(chan helper.CommandResult)
+        ch := make(chan CommandResult)
         chans = append(chans, ch)
 
-        helper.RunCommand(fmt.Sprintf("musly -a \"%s\" -c \"%s\"", track.Pathname, collections[i].Pathname), ch)
+        RunCommand(fmt.Sprintf("musly -a \"%s\" -c \"%s\"", track.Pathname, collections[i].Pathname), ch)
     }
 
-    var crs = []helper.CommandResult{}
+    var crs = []CommandResult{}
 
     for i := 0; i < len(chans); i++ {
         cr := <- chans[i]
@@ -92,17 +90,17 @@ func addTrackToCollections(track *Track, collections Collections) (err error) {
 }
 
 // Returns similar tracks
-func getSimilarTracks(track *Track, collections Collections) (similarTracks SimilarTracks, err error) {
-    var chans = []chan helper.CommandResult{}
+func GetSimilarTracks(track *Track, collections Collections) (similarTracks SimilarTracks, err error) {
+    var chans = []chan CommandResult{}
 
     for i := 0; i < len(collections); i++ {
-        ch := make(chan helper.CommandResult)
-        helper.RunCommand(fmt.Sprintf("musly -p \"%s\" -k20 -c \"%s\"", track.Pathname, collections[i].Pathname), ch)
+        ch := make(chan CommandResult)
+        RunCommand(fmt.Sprintf("musly -p \"%s\" -k20 -c \"%s\"", track.Pathname, collections[i].Pathname), ch)
 
         chans = append(chans, ch)
     }
 
-    var crs = []helper.CommandResult{}
+    var crs = []CommandResult{}
 
     for i := 0; i < len(chans); i++ {
         mr := <- chans[i]
