@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "log"
     "net/http"
     "runtime"
@@ -19,6 +20,10 @@ func main() {
 
     r.POST("/musly/collection/tracks", sc.AddTrackToCollection)
     r.GET("/musly/similar/*pathname", sc.GetSimilarTracks)
+
+    r.GET("/ping", func (w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+        fmt.Fprint(w, "Pong\n")
+    })
 
     log.Fatal(http.ListenAndServe(":80", r))
 }
