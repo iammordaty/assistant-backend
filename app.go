@@ -22,7 +22,7 @@ func main() {
     r.GET("/musly/similar/*pathname", sc.GetSimilarTracks)
 
     r.GET("/ping", func (w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-        fmt.Fprint(w, "Pong\n")
+        fmt.Fprint(w, "pong\n")
     })
 
     log.Fatal(http.ListenAndServe(":80", r))
