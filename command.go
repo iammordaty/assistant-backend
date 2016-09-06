@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"os/exec"
+    "bytes"
+    "os/exec"
     "strings"
 )
 
@@ -13,13 +13,13 @@ func RunCommand(cmd string, ch chan CommandResult) {
 }
 
 type Command struct {
-	Command     string
-	Args        []string
-	Result      chan CommandResult
+    Command     string
+    Args        []string
+    Result      chan CommandResult
 }
 
 type CommandResult struct {
-	Stdout      string
+    Stdout      string
     Stderr      string
     Error       error
 }
