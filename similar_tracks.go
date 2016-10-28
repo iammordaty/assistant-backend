@@ -4,20 +4,21 @@ import (
     "encoding/json"
     "fmt"
     "net/http"
+    "net/url"
     "os"
     "path/filepath"
     "strconv"
 
-    "github.com/julienschmidt/httprouter"
+    "github.com/go-zoo/bone"
 )
 
-type SimilarTracksController struct {}
+type CollectionController struct {}
 
-func NewSimilarTracksController() *SimilarTracksController {
-    return &SimilarTracksController{}
+func NewCollectionController() *CollectionController {
+    return &CollectionController{}
 }
 
-func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (c CollectionController) AddTrackToCollection(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
 
     var payload Payload;
@@ -44,7 +45,8 @@ func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *
         return
     }
 
-    track := NewTrack(payload.Pathname)
+    pathname, _ := url.QueryUnescape(bone.GetValue(r, "pathname")) // TODO: do NewTrack
+    track := NewTrack(pathname)
 
     if filepath.Ext(track.Pathname) != ".mp3" {
         RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file"}, http.StatusBadRequest)
@@ -77,13 +79,13 @@ func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *
     RenderJson(w, collections, http.StatusOK)
 }
 
-// GET /musly/track/track_pathname/similar?initial_key=4A&initial_key=5A&year=2015&year=2016
-// musly -p "track_pathname" -k 100 -c "collection_pathname"
-func (c SimilarTracksController) GetSimilarTracks(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (c CollectionController) GetSimilarTracks(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
 
+    pathname, _ := url.QueryUnescape(bone.GetValue(r, "pathname")) // TODO: do NewTrack
+
     payload := Payload{};
-    payload.Pathname = p.ByName("pathname")
+    payload.Pathname = pathname
     payload.InitialKey = r.URL.Query()["initial_key"]
 
     for _, v := range r.URL.Query()["year"] {
@@ -92,7 +94,7 @@ func (c SimilarTracksController) GetSimilarTracks(w http.ResponseWriter, r *http
         }
     }
 
-    track := NewTrack(p.ByName("pathname"))
+    track := NewTrack(pathname)
 
     if filepath.Ext(track.Pathname) != ".mp3" {
         RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file"}, http.StatusBadRequest)

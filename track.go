@@ -7,7 +7,7 @@ import (
 func NewTrack(relativePathname string) *Track {
     t := &Track{}
     t.RelativePathname = relativePathname;
-    t.Pathname = fmt.Sprintf("/collection%s", relativePathname);
+    t.Pathname = fmt.Sprintf("%s%s", collectionRoot, relativePathname);
 
     return t
 }

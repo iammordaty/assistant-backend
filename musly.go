@@ -126,7 +126,7 @@ func GetSimilarTracks(track *Track, collections Collections) (similarTracks Simi
             continue
         }
 
-        pathname := strings.Replace(strings.SplitAfter(line, "track-origin: ")[1], "/collection", "", 1)
+        pathname := strings.Replace(strings.SplitAfter(line, "track-origin: ")[1], muslyCollectionsDir, "", 1)
         similarity, _ := strconv.ParseFloat(strings.Split(strings.SplitAfter(line, "track-similarity: ")[1], ", ")[0], 64)
 
         similaritySum[pathname] += similarity
