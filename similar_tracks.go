@@ -17,9 +17,6 @@ func NewSimilarTracksController() *SimilarTracksController {
     return &SimilarTracksController{}
 }
 
-// POST /musly/collection/tracks
-// { "initial_key": [ "4A", "5A" ], "year": [ 2015, 2014 ], "pathname": "pathname" }
-// musly -x mp3 -a "track_pathname" -c "collection_pathname"
 func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
     defer r.Body.Close()
 

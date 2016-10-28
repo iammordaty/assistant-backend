@@ -3,21 +3,23 @@ package main
 import (
     "fmt"
     "net/http"
+    "net/url"
     "os"
     "path/filepath"
     "strconv"
 
-    "github.com/julienschmidt/httprouter"
+    "github.com/go-zoo/bone"
 )
 
-type AudioDataController struct {}
+type TrackController struct {}
 
-func NewAudioDataController() *AudioDataController {
-    return &AudioDataController{}
+func NewTrackController() *TrackController {
+    return &TrackController{}
 }
 
-func (c AudioDataController) CalculateTrackAudioData(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-    track := NewTrack(p.ByName("pathname"))
+func (c TrackController) CalculateBpm(w http.ResponseWriter, r *http.Request) {
+    pathname, _ := url.QueryUnescape(bone.GetValue(r, "pathname")) // TODO: do NewTrack
+    track := NewTrack(pathname)
 
     if filepath.Ext(track.Pathname) != ".mp3" {
         RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file"}, http.StatusBadRequest)
@@ -29,35 +31,69 @@ func (c AudioDataController) CalculateTrackAudioData(w http.ResponseWriter, r *h
         return
     }
 
-    kfch := make(chan CommandResult)
-    RunCommand(fmt.Sprintf("keyfinder-cli -n camelot \"%s\"", track.Pathname), kfch)
+    ch := make(chan CommandResult)
+    RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 2 --norm -G - | bpm -f \"%%.1f\"", track.Pathname), ch)
+    cr := <- ch
 
-    bpmch := make(chan CommandResult)
-    RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 2 --norm -G - | bpm -f \"%%.1f\"", track.Pathname), bpmch)
-
-    kfr := <- kfch
-    bpmr := <- bpmch
-
-    if kfr.Error != nil {
-        RenderJson(w, &CommandErrorResponse{kfr.Stderr, "keyfinder-cli"}, http.StatusInternalServerError)
-        return
-    }
-
-    track.InitialKey = kfr.Stdout
-    track.Bpm, _ = strconv.ParseFloat(bpmr.Stdout, 64)
+    track.Bpm, _ = strconv.ParseFloat(cr.Stdout, 64)
 
     if track.Bpm <= 100 {
-        bpmch = make(chan CommandResult)
-        RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 1 --norm -G - | bpm -f \"%%.1f\"", track.Pathname), bpmch)
-        bpmr = <- bpmch
+        ch = make(chan CommandResult)
+        RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 1 --norm -G - | bpm -f \"%%.1f\"", track.Pathname), ch)
+        cr = <- ch
 
-        track.Bpm, _ = strconv.ParseFloat(bpmr.Stdout, 64)
+        track.Bpm, _ = strconv.ParseFloat(cr.Stdout, 64)
     }
 
-    if bpmr.Error != nil || bpmr.Stderr != "" {
-        RenderJson(w, &CommandErrorResponse{bpmr.Stderr, "bpm"}, http.StatusInternalServerError)
+    if cr.Stderr != "" {
+        RenderJson(w, &CommandErrorResponse{cr.Stderr, "bpm"}, http.StatusInternalServerError)
         return
     }
 
     RenderJson(w, track, http.StatusOK)
+}
+
+func (c TrackController) CalculateKey(w http.ResponseWriter, r *http.Request) {
+    pathname, _ := url.QueryUnescape(bone.GetValue(r, "pathname")) // TODO: do NewTrack
+    track := NewTrack(pathname)
+
+    if filepath.Ext(track.Pathname) != ".mp3" {
+        RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file"}, http.StatusBadRequest)
+        return
+    }
+
+    if _, err := os.Stat(track.Pathname); os.IsNotExist(err) {
+        RenderJson(w, &ErrorResponse{http.StatusText(http.StatusNotFound)}, http.StatusNotFound)
+        return
+    }
+
+    ch := make(chan CommandResult)
+    RunCommand(fmt.Sprintf("keyfinder-cli -n camelot \"%s\"", track.Pathname), ch)
+
+    cr := <- ch
+
+    if cr.Error != nil {
+        RenderJson(w, &CommandErrorResponse{cr.Stderr, "keyfinder-cli"}, http.StatusInternalServerError)
+        return
+    }
+
+    track.InitialKey = cr.Stdout
+
+    RenderJson(w, track, http.StatusOK)
+}
+
+// essentia_streaming_extractor_music Finally.mp3 Finally.mp3.json profile.in
+func (c TrackController) CalculateTags(w http.ResponseWriter, r *http.Request) {
+    pathname, _ := url.QueryUnescape(bone.GetValue(r, "pathname")) // TODO: do NewTrack
+    track := NewTrack(pathname)
+
+    if filepath.Ext(track.Pathname) != ".mp3" {
+        RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file"}, http.StatusBadRequest)
+        return
+    }
+
+    if _, err := os.Stat(track.Pathname); os.IsNotExist(err) {
+        RenderJson(w, &ErrorResponse{http.StatusText(http.StatusNotFound)}, http.StatusNotFound)
+        return
+    }
 }

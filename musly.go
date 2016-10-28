@@ -12,7 +12,7 @@ import (
     "strings"
 )
 
-// Ensures that collections are exists has been initialized
+// Ensures that collections are exists and has been initialized
 func EnsureCollections(collections Collections) (err error) {
     var chans = []chan CommandResult{}
 
@@ -138,7 +138,7 @@ func GetSimilarTracks(track *Track, collections Collections) (similarTracks Simi
     for pathname, similarity := range similaritySum {
         similarity, _ = strconv.ParseFloat(fmt.Sprintf("%.4f", 100 - (similarity / occuriences[pathname] * 100)), 64)
 
-        similarTracks = append(similarTracks, SimilarTrack{NewTrack(pathname), similarity})
+        similarTracks = append(similarTracks, NewSimilarTrack(pathname, similarity))
     }
 
     sort.Sort(similarTracks)

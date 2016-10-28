@@ -6,11 +6,8 @@ import (
     "strings"
 )
 
-func RunCommand(cmd string, ch chan CommandResult) {
-    command := &Command{"/bin/sh", []string{"-c", cmd}, ch}
-
-    go command.Run()
-}
+// http://stackoverflow.com/questions/40247726/go-execute-a-bash-command-n-times-using-goroutines-and-store-print-its-resul
+// http://stackoverflow.com/questions/25283600/go-routine-for-cmd-exec-but-with-errorcode
 
 type Command struct {
     Command     string
@@ -22,6 +19,12 @@ type CommandResult struct {
     Stdout      string
     Stderr      string
     Error       error
+}
+
+func RunCommand(cmd string, ch chan CommandResult) {
+    command := &Command{"/bin/sh", []string{"-c", cmd}, ch}
+
+    go command.Run()
 }
 
 func (c *Command) Run() {
