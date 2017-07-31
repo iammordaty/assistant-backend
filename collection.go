@@ -10,10 +10,10 @@ type Collection struct {
     Tracks   Tracks `json:"tracks,omitempty"`
 }
 
-func NewCollection(year uint16, key string) *Collection {
+func NewCollection(year uint16) *Collection {
     c := &Collection{};
-    c.Name = fmt.Sprintf("collection.%d.%s.musly", year, fmt.Sprintf("%03s", key));
-    c.Pathname = fmt.Sprintf("/data/collections/%d/%s", year, c.Name)
+    c.Name = fmt.Sprintf("collection.%d.musly", year);
+    c.Pathname = fmt.Sprintf("/data/collections/%s", c.Name)
 
     return c;
 }

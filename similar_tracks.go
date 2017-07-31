@@ -18,7 +18,7 @@ func NewSimilarTracksController() *SimilarTracksController {
 }
 
 // POST /musly/collection/tracks
-// { "initial_key": [ "4A", "5A" ], "year": [ 2015, 2014 ], "pathname": "pathname" }
+// { "year": [ 2015, 2014 ], "pathname": "pathname" }
 // musly -x mp3 -a "track_pathname" -c "collection_pathname"
 func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
     defer r.Body.Close()
@@ -34,11 +34,6 @@ func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *
 
     if payload.Pathname == "" {
         RenderJson(w, &ErrorResponse{"Field \"pathname\" is required."}, http.StatusBadRequest)
-        return
-    }
-
-    if len(payload.InitialKey) == 0 {
-        RenderJson(w, &ErrorResponse{"Field \"initial_key\" is required."}, http.StatusBadRequest)
         return
     }
 
@@ -62,9 +57,7 @@ func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *
     collections := Collections{}
 
     for _, year := range payload.Year {
-        for _, key := range payload.InitialKey {
-            collections = append(collections, NewCollection(year, key))
-        }
+        collections = append(collections, NewCollection(year))
     }
 
     if err := EnsureCollections(collections); err != nil {
@@ -80,14 +73,13 @@ func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *
     RenderJson(w, collections, http.StatusOK)
 }
 
-// GET /musly/track/track_pathname/similar?initial_key=4A&initial_key=5A&year=2015&year=2016
+// GET /musly/track/track_pathname/similar?year=2015&year=2016
 // musly -p "track_pathname" -k 100 -c "collection_pathname"
 func (c SimilarTracksController) GetSimilarTracks(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
     defer r.Body.Close()
 
     payload := Payload{};
     payload.Pathname = p.ByName("pathname")
-    payload.InitialKey = r.URL.Query()["initial_key"]
 
     for _, v := range r.URL.Query()["year"] {
         if s, err := strconv.ParseUint(v, 10, 16); err == nil {
@@ -110,9 +102,7 @@ func (c SimilarTracksController) GetSimilarTracks(w http.ResponseWriter, r *http
     collections := Collections{}
 
     for _, year := range payload.Year {
-        for _, key := range payload.InitialKey {
-            collections = append(collections, NewCollection(year, key))
-        }
+        collections = append(collections, NewCollection(year))
     }
 
     similarTracks, err := GetSimilarTracks(track, collections)
