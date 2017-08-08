@@ -6,7 +6,6 @@ import (
     "net/http"
     "os"
     "path/filepath"
-    "strconv"
 
     "github.com/julienschmidt/httprouter"
 )
@@ -18,12 +17,12 @@ func NewSimilarTracksController() *SimilarTracksController {
 }
 
 // POST /musly/collection/tracks
-// { "year": [ 2015, 2014 ], "pathname": "pathname" }
+// { "pathname": "track_pathname" }
 // musly -x mp3 -a "track_pathname" -c "collection_pathname"
 func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
     defer r.Body.Close()
 
-    var payload Payload;
+    var payload map[string]string
 
     if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
         RenderJson(w, &ErrorResponse{"Request body is not valid JSON string"}, http.StatusBadRequest)
@@ -32,17 +31,7 @@ func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *
         return
     }
 
-    if payload.Pathname == "" {
-        RenderJson(w, &ErrorResponse{"Field \"pathname\" is required."}, http.StatusBadRequest)
-        return
-    }
-
-    if len(payload.Year) == 0 {
-        RenderJson(w, &ErrorResponse{"Field \"year\" is required."}, http.StatusBadRequest)
-        return
-    }
-
-    track := NewTrack(payload.Pathname)
+    track := NewTrack(payload["pathname"])
 
     if filepath.Ext(track.Pathname) != ".mp3" {
         RenderJson(w, &ErrorResponse{"Pathname does not seems to be an mp3 file"}, http.StatusBadRequest)
@@ -54,38 +43,25 @@ func (c SimilarTracksController) AddTrackToCollection(w http.ResponseWriter, r *
         return
     }
 
-    collections := Collections{}
+    collection := NewCollection()
 
-    for _, year := range payload.Year {
-        collections = append(collections, NewCollection(year))
-    }
-
-    if err := EnsureCollections(collections); err != nil {
+    if err := EnsureCollection(collection); err != nil {
         RenderJson(w, &ErrorResponse{fmt.Sprint(err)}, http.StatusInternalServerError)
         return
     }
 
-    if err := AddTrackToCollections(track, collections); err != nil {
+    if err := AddTrackToCollection(track, collection); err != nil {
         RenderJson(w, &ErrorResponse{fmt.Sprint(err)}, http.StatusInternalServerError)
         return
     }
 
-    RenderJson(w, collections, http.StatusOK)
+    RenderJson(w, collection, http.StatusOK)
 }
 
-// GET /musly/track/track_pathname/similar?year=2015&year=2016
+// GET /musly/track/track_pathname/similar
 // musly -p "track_pathname" -k 100 -c "collection_pathname"
 func (c SimilarTracksController) GetSimilarTracks(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
     defer r.Body.Close()
-
-    payload := Payload{};
-    payload.Pathname = p.ByName("pathname")
-
-    for _, v := range r.URL.Query()["year"] {
-        if s, err := strconv.ParseUint(v, 10, 16); err == nil {
-            payload.Year = append(payload.Year, uint16(s))
-        }
-    }
 
     track := NewTrack(p.ByName("pathname"))
 
@@ -99,13 +75,7 @@ func (c SimilarTracksController) GetSimilarTracks(w http.ResponseWriter, r *http
         return
     }
 
-    collections := Collections{}
-
-    for _, year := range payload.Year {
-        collections = append(collections, NewCollection(year))
-    }
-
-    similarTracks, err := GetSimilarTracks(track, collections)
+    similarTracks, err := GetSimilarTracks(track, NewCollection())
 
     if err != nil {
         RenderJson(w, &ErrorResponse{fmt.Sprint(err)}, http.StatusInternalServerError)

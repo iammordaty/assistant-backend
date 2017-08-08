@@ -5,17 +5,17 @@ import (
 )
 
 type Collection struct {
-    Name     string `json:"name"`
-    Pathname string `json:"pathname"`
-    Tracks   Tracks `json:"tracks,omitempty"`
+    Name            string `json:"name"`
+    Pathname        string `json:"pathname"`
+    JukeboxPathname string `json:"-"`
+    Tracks          Tracks `json:"tracks,omitempty"`
 }
 
-func NewCollection(year uint16) *Collection {
+func NewCollection() *Collection {
     c := &Collection{};
-    c.Name = fmt.Sprintf("collection.%d.musly", year);
+    c.Name = "collection.musly"
     c.Pathname = fmt.Sprintf("/data/collections/%s", c.Name)
+    c.JukeboxPathname = fmt.Sprintf("%s/collection.jbox", c.Pathname)
 
     return c;
 }
-
-type Collections []*Collection
