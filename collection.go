@@ -15,7 +15,7 @@ func NewCollection() *Collection {
     c := &Collection{};
     c.Name = "collection.musly"
     c.Pathname = fmt.Sprintf("/data/collections/%s", c.Name)
-    c.JukeboxPathname = fmt.Sprintf("%s/collection.jbox", c.Pathname)
+    c.JukeboxPathname = "/data/collections/collection.jbox"
 
     return c;
 }
