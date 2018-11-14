@@ -14,8 +14,8 @@ type Collection struct {
 func NewCollection() *Collection {
     c := &Collection{};
     c.Name = "collection.musly"
-    c.Pathname = fmt.Sprintf("/data/collections/%s", c.Name)
-    c.JukeboxPathname = "/data/collections/collection.jbox"
+    c.Pathname = fmt.Sprintf("/musly/%s", c.Name)
+    c.JukeboxPathname = "/musly/collection.jbox"
 
     return c;
 }
