@@ -1,22 +1,16 @@
 package main
 
-import (
-    "fmt"
-)
-
-func NewTrack(relativePathname string) *Track {
+func NewTrack(pathname string) *Track {
     t := &Track{}
-    t.RelativePathname = relativePathname;
-    t.Pathname = fmt.Sprintf("/collection%s", relativePathname);
+    t.Pathname = pathname;
 
     return t
 }
 
 type Track struct {
-    InitialKey       string  `json:"initial_key"`
-    Bpm              float64 `json:"bpm"`
-    RelativePathname string  `json:"pathname"`
-    Pathname         string  `json:"-"`
+    InitialKey  string  `json:"initial_key"`
+    Bpm         float64 `json:"bpm"`
+    Pathname    string  `json:"pathname"`
 }
 
 type Tracks []*Track
