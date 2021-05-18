@@ -33,7 +33,7 @@ func (c AudioDataController) CalculateTrackAudioData(w http.ResponseWriter, r *h
     RunCommand(fmt.Sprintf("keyfinder-cli -n camelot \"%s\"", track.Pathname), kfch)
 
     bpmch := make(chan CommandResult)
-    RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 2 --norm -G - | bpm -f \"%%.1f\"", track.Pathname), bpmch)
+    RunCommand(fmt.Sprintf("sox -V1 \"%s\" -t raw -r 44100 -e floating-point -c 2 -G - | bpm -x 155 -f \"%%.1f\"", track.Pathname), bpmch)
 
     kfr := <- kfch
     bpmr := <- bpmch
@@ -48,7 +48,7 @@ func (c AudioDataController) CalculateTrackAudioData(w http.ResponseWriter, r *h
 
     if track.Bpm <= 100 {
         bpmch = make(chan CommandResult)
-        RunCommand(fmt.Sprintf("sox \"%s\" -t raw -r 44100 -e floating-point -c 1 --norm -G - | bpm -f \"%%.1f\"", track.Pathname), bpmch)
+        RunCommand(fmt.Sprintf("sox -V1 \"%s\" -t raw -r 44100 -e floating-point -c 1 -G - | bpm -x 155 -f \"%%.1f\"", track.Pathname), bpmch)
         bpmr = <- bpmch
 
         track.Bpm, _ = strconv.ParseFloat(bpmr.Stdout, 64)
