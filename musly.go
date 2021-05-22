@@ -60,7 +60,7 @@ func AddTrackToCollection(track *Track, collection *Collection) (err error) {
 // Returns similar tracks
 func GetSimilarTracks(track *Track, collection *Collection) (similarTracks SimilarTracks, err error) {
     ch := make(chan CommandResult)
-    RunCommand(fmt.Sprintf("musly -p \"%s\" -k 200 -c \"%s\" -j \"%s\"", track.Pathname, collection.Pathname, collection.JukeboxPathname), ch)
+    RunCommand(fmt.Sprintf("musly -p \"%s\" -k 200 -o long -c \"%s\" -j \"%s\"", track.Pathname, collection.Pathname, collection.JukeboxPathname), ch)
 
     cr := <- ch
 
@@ -76,7 +76,7 @@ func GetSimilarTracks(track *Track, collection *Collection) (similarTracks Simil
 
         pathname := strings.SplitAfter(line, "track-origin: ")[1]
 
-        distance, _ := strconv.ParseFloat(strings.Split(strings.SplitAfter(line, "track-similarity: ")[1], ", ")[0], 64)
+        distance, _ := strconv.ParseFloat(strings.Split(strings.SplitAfter(line, "track-distance: ")[1], ", ")[0], 64)
         similarity, _ := strconv.ParseFloat(fmt.Sprintf("%.4f", 100 - (distance * 100)), 64)
 
         similarTracks = append(similarTracks, SimilarTrack{NewTrack(pathname), similarity})
